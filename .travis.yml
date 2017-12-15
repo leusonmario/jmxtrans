@@ -1,6 +1,25 @@
+
+sudo: required
 language: java
-install: mvn dependency:go-offline -B -V
-before_script: sudo apt-get -y update && sudo apt-get -y install devscripts build-essential
+
+jdk:
+  - oraclejdk8
+
 script:
-  - "ant debian"
-  - "mvn clean verify -B -V"
+  - mvn clean cobertura:cobertura -Dtest=WatchDirTest#createdFileIsDetected -DfailIfNoTests=false
+
+before_deploy:
+- tar -zcvf coverage-result.tar.gz /home/travis/build/leusonmario/jmxtrans/target/site/cobertura
+
+deploy:
+  provider: releases
+  api_key:
+    secure: "bndm5rvd9J8RDlJYPWTiIyeCI4QUhdylsUBqMZvV9fSBaR0X0CmOrC2x0cDoKg6z7DaG9e4f3ZNu4zTWWIjGHQmhwtwNLxL2sTqRky+QLxQM2vEERSS3rnBmzc50ImlGxCur4iDVZpVDL1NPNE/swwDQMv7qelDPYSM6BEhui56AMaTicsL2Ampmvpur7vRrnY5N9/8YhrAYHQfwWmH1VmPefWgoAFwOV0Jgb/C5O4fB3mxvmW4ekTDi1SmEUFA8AiStNOuIohu1zW4dPSTG42yeUi8U9tcxAqYv6iJoSA4++xTzfXE/7easpyrErXmhs5lJJSSYUmMHImZKgRWuZ7WZerilV9KcfoQzcapdVXu6rfIf4W01qdwIxAvcT5Nc0OKZ/rsFM6tmwAGjF6cAR8mvzTYJs+dBHzdwbqyuBLR3XM3skuEJXuHBHKFzAm+t4eIMwW58dXqW5QhYVJdSByBK73C/V8dxFxpbznrbWONlvZ2D8l5KWtIZLEaASdDoxPWVwM7iZqsYcjlbdqrranqjD7DIx+mzr5gv4tF/uWdZaKVmnxglzJQMnV1dKx3d3Uk7TcZn9OG1SN7y7kg/IdODDMbq8P0uS3OC7PsOKnNoWoirMMNv1NeMqesS5HRQAtZcORtsOR8ddQza686VtObXJtz/4kEGKfUiLbNQBL8="
+
+
+  file: coverage-result.tar.gz
+  file_glob: true
+  overwrite: true
+  skip_cleanup: true
+  on:
+    tags: true
